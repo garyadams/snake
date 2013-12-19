@@ -20,8 +20,8 @@ snake = {
 		snake.direction = "left";
 
 		for (i = snake.x + (10 * snake.size); i >= snake.x; i-=snake.size) {
-      		snake.body.push(i + ',' + snake.y);
-    	}
+    	snake.body.push(i + ',' + snake.y);
+  	}
 	},
 
 	move: function() {
@@ -47,24 +47,81 @@ snake = {
 	draw: function() {
 		for (var j = 0; j < snake.body.length; j++) {
 
-			ctx.fillText(snake.body[j], 10, 50+(10*j));
-
 			var bodyPart = snake.body[j].split(",");
 
-			ctx.fillText(parseInt(bodyPart[0])+1, 60, 50+(10*j));
+			ctx.fillStyle="#fff";
+
+			ctx.fillText(snake.body[j], 10, 20+(10*j));
 
 			if (bodyPart[0] == snake.x && bodyPart[1] == snake.y) {
-				ctx.fillStyle="#FF0000";
+				ctx.fillStyle="#990000";
 			} else {
-				ctx.fillStyle="#000000";
+				ctx.fillStyle="#660000";
 			}
 
-			ctx.fillRect(parseInt(bodyPart[0]), bodyPart[1], snake.size-1, snake.size-1);
+			ctx.fillRect(parseInt(bodyPart[0])+1, parseInt(bodyPart[1])+1, snake.size-2, snake.size-2);
 
 		}
 	}
 
 };
+
+food = {
+
+	size: 20,
+	locations: [],
+  
+  spawn: function() {
+  	food.locations.push('400,400');
+	},
+
+	draw: function() {
+		for (var i = 0; i < food.locations.length; i++) {
+			var foodPart = food.locations[i].split(",");
+
+			ctx.fillStyle="#009900";
+			ctx.fillRect(parseInt(foodPart[0])+1, parseInt(foodPart[1])+1, food.size-2, food.size-2);
+		}
+	}
+
+};
+
+function loop() {
+
+	ctx.clearRect(0,0,canvas.width,canvas.height);
+	drawGridLines();
+
+	snake.move();
+	food.draw();
+	snake.draw();
+
+	setTimeout(function() {
+  	requestAnimationFrame(loop);
+  }, 1000 / 8);
+
+}
+
+var requestAnimationFrame =  window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame;
+
+food.spawn();
+snake.init();
+requestAnimationFrame(loop);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Controls and user input.
 
 inverseDirection = {
   'up':'down',
@@ -73,47 +130,67 @@ inverseDirection = {
   'down':'up'
 };
 
-keys = {
-  up: [38, 75, 87],
-  down: [40, 74, 83],
-  left: [37, 65, 72],
-  right: [39, 68, 76],
-  start_game: [13, 32]
-};
-
-Object.prototype.getKey = function(value){
-  for(var key in this){
-    if(this[key] instanceof Array && this[key].indexOf(value) >= 0){
-      return key;
-    }
-  }
-  return null;
-};
-
 addEventListener("keydown", function (e) {
-    lastKey = keys.getKey(e.keyCode);
-    if (['up', 'down', 'left', 'right'].indexOf(lastKey) >= 0
-        && lastKey != inverseDirection[snake.direction]) {
-      snake.direction = lastKey;
-    } else if (['start_game'].indexOf(lastKey) >= 0 && game.over) {
-      game.start();
-    }
+    
+	var lastKey;
+
+  if(e.keyCode === 38) {
+		lastKey = "up"
+	}
+
+	if(e.keyCode === 40) {
+		lastKey = "down"
+	}
+
+	if(e.keyCode === 37) {
+		lastKey = "left"
+	}
+
+	if(e.keyCode === 39) {
+		lastKey = "right"
+	}
+
+  if (["up", "down", "left", "right"].indexOf(lastKey) >= 0 && lastKey != inverseDirection[snake.direction]) {
+    snake.direction = lastKey;
+  }
+
 }, false);
 
-function loop() {
 
-	ctx.clearRect(0,0,canvas.width,canvas.height);
+
+
+
+
+
+
+
+
+
+function drawGridLines() 
+{
+
+	var gridPixelSize = 20;
+	ctx.lineWidth = 0.3;
+	ctx.strokeStyle = "#999";
+
+	//Horizontal grid lines.
+	for(var i = 0; i <= canvas.height - 0; i = i + gridPixelSize)
+	{
+		ctx.beginPath();
+		ctx.moveTo(0, i);
+		ctx.lineTo(canvas.width, i);
+		ctx.closePath();
+		ctx.stroke();
+	}
 	
-	snake.move();
-	snake.draw();
-
-	setTimeout(function() {
-        requestAnimationFrame(loop);
-    }, 1000 / 8);
+	//Vertical grid lines.
+	for(var j = 0; j <= canvas.width -0; j = j + gridPixelSize)
+	{
+		ctx.beginPath();
+		ctx.moveTo(j, 0);
+		ctx.lineTo(j, canvas.height);
+		ctx.closePath();
+		ctx.stroke();
+	}
 
 }
-
-var requestAnimationFrame =  window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame;
-
-snake.init();
-requestAnimationFrame(loop);
